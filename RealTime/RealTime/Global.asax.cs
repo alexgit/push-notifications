@@ -6,6 +6,8 @@ using System.Web.Http;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
+using SignalR;
+using RealTime.EndPoints;
 
 namespace RealTime
 {
@@ -23,6 +25,8 @@ namespace RealTime
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
+            routes.MapConnection<RelayEndpoint>("relay", "relay/{*operation}");
+
             routes.MapHttpRoute(
                 name: "DefaultApi",
                 routeTemplate: "api/{controller}/{id}",
@@ -33,7 +37,7 @@ namespace RealTime
                 name: "Default",
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
-            );
+            );            
         }
 
         protected void Application_Start()
@@ -43,7 +47,7 @@ namespace RealTime
             RegisterGlobalFilters(GlobalFilters.Filters);
             RegisterRoutes(RouteTable.Routes);
 
-            BundleTable.Bundles.RegisterTemplateBundles();
+            BundleTable.Bundles.RegisterTemplateBundles();            
         }
     }
 }

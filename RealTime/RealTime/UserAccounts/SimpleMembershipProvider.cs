@@ -5,41 +5,43 @@ using System.Web;
 using System.Web.Security;
 using System.IO;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 
 namespace RealTime.UserAccounts
 {
     public class SimpleMembershipProvider : MembershipProvider
     {
-        private static string userAccountsFilename = "users.db";
+        private static string userAccountsFilename = @"c:\users.db";
 
-        private IDictionary<string, MembershipUser> userDb;
+        private static IDictionary<string, MembershipUser> userDb = new ConcurrentDictionary<string, MembershipUser>();
 
-        public override void Initialize(string name, System.Collections.Specialized.NameValueCollection config)
+        static SimpleMembershipProvider() 
         {
-            base.Initialize(name, config);
+            InitializeUserDb();
+        }
 
-            userDb = new Dictionary<string, MembershipUser>();
-
+        private static void InitializeUserDb() 
+        {
             var lines = new List<string>();
-            using(var reader = new StreamReader(userAccountsFilename)) 
-            {                
+            using (var reader = new StreamReader(userAccountsFilename))
+            {
                 var line = string.Empty;
-                while ((line = reader.ReadLine()) != null) 
+                while ((line = reader.ReadLine()) != null)
                 {
                     lines.Add(line);
                 }
             }
 
-            foreach (var l in lines) 
+            foreach (var l in lines)
             {
-                var tuple = l.Split(':');
+                var tuple = l.Split(new[] { "=>" }, StringSplitOptions.None);
 
-                var username = tuple[0];
-                var jsonSerializedUser = tuple[1];
+                var username = tuple[0].Trim();
+                var jsonSerializedUser = tuple[1].Trim();
 
-                var user = JsonConvert.DeserializeObject<MembershipUser>(jsonSerializedUser);
-
-                userDb.Add(username, user);
+                var userDTO = JsonConvert.DeserializeObject<UserDTO>(jsonSerializedUser);
+                
+                userDb.Add(username, new SimpleMembershipUser(userDTO));
             }
         }
 
@@ -51,7 +53,7 @@ namespace RealTime.UserAccounts
                 {
                     var username = kvp.Key;
                     var serializedUser = JsonConvert.SerializeObject(kvp.Value);
-                    writer.WriteLine(string.Format("{0}:{1}", username, serializedUser));
+                    writer.WriteLine(string.Format("{0}=>{1}", username, serializedUser));
                 }
             }
         }
@@ -90,7 +92,23 @@ namespace RealTime.UserAccounts
 
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
-            var newUser = new MembershipUser("SimpleProvider", username, providerUserKey, email, passwordQuestion, string.Empty, isApproved, false, DateTime.Now, DateTime.Now, DateTime.Now, DateTime.MinValue, DateTime.MinValue);
+            var userDTO = new UserDTO 
+            {
+                ProviderName = "SimpleMembershipProvider",
+                UserName = username,
+                Password = password,
+                ProviderUserKey = providerUserKey, 
+                Email = email, 
+                PasswordQuestion = passwordQuestion, 
+                Comment = string.Empty, 
+                IsApproved = isApproved, 
+                IsLockedOut = false, 
+                LastActivityDate = DateTime.Now,
+                LastLockoutDate = DateTime.MinValue,
+                LastLoginDate = DateTime.Now,
+                LastPasswordChangedDate = DateTime.MinValue
+            };
+            var newUser = new SimpleMembershipUser(userDTO);
 
             status = MembershipCreateStatus.Success;
 
@@ -238,7 +256,11 @@ namespace RealTime.UserAccounts
 
         public override bool ValidateUser(string username, string password)
         {
-            return true;
+            MembershipUser user = null;
+            try { user = userDb[username]; }
+            catch { }
+
+            return user != null && user.GetPassword() == password;
         }        
     }
 }

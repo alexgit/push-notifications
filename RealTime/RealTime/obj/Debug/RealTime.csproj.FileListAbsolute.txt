@@ -48,3 +48,5 @@ E:\projects\csharp\realtime\RealTime\RealTime\bin\System.Web.WebPages.Razor.xml
 E:\projects\csharp\realtime\RealTime\RealTime\obj\Debug\ResolveAssemblyReference.cache
 E:\projects\csharp\realtime\RealTime\RealTime\obj\Debug\RealTime.dll
 E:\projects\csharp\realtime\RealTime\RealTime\obj\Debug\RealTime.pdb
+E:\projects\csharp\realtime\RealTime\RealTime\bin\Messages.dll
+E:\projects\csharp\realtime\RealTime\RealTime\bin\Messages.pdb

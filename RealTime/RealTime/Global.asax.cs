@@ -25,7 +25,7 @@ namespace RealTime
         {
             routes.IgnoreRoute("{resource}.axd/{*pathInfo}");
 
-            routes.MapConnection<RelayEndpoint>("relay", "relay/{*operation}");
+            routes.MapConnection<UserTaskEndpoint>("relay", "relay/{*operation}");
 
             routes.MapHttpRoute(
                 name: "DefaultApi",

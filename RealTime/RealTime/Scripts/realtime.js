@@ -35,8 +35,7 @@ $(function () {
     });
 
     console.log(connection.id);
-
-
+    
     ko.applyBindings(viewModel);
 });
 

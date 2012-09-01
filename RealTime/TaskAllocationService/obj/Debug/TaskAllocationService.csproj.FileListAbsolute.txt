@@ -1,0 +1,9 @@
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\bin\Debug\TaskAllocationService.dll
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\bin\Debug\TaskAllocationService.pdb
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\bin\Debug\Messages.dll
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\bin\Debug\NServiceBus.dll
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\bin\Debug\Messages.pdb
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\bin\Debug\NServiceBus.xml
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\obj\Debug\ResolveAssemblyReference.cache
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\obj\Debug\TaskAllocationService.dll
+E:\projects\csharp\realtime\RealTime\TaskAllocationService\obj\Debug\TaskAllocationService.pdb

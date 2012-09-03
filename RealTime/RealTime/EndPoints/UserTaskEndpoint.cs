@@ -9,6 +9,7 @@ using RealTime.Models;
 using RealTime.MessageHandlers;
 using NServiceBus;
 using Messages;
+using SignalR.Hubs;
 
 namespace RealTime.EndPoints
 {
@@ -17,8 +18,8 @@ namespace RealTime.EndPoints
         private readonly ConnectionLookup connectionLookup;
         private readonly TaskDistributor taskDistributor;
         private readonly IBus messageBus;
-        
-        //TODO: need to set up IoC / Dependency Injection with SignalR
+        private User user;
+               
         public UserTaskEndpoint(TaskDistributor taskDistributor, ConnectionLookup connectionLookup, IBus messageBus) 
         {
             this.taskDistributor = taskDistributor;
@@ -30,12 +31,11 @@ namespace RealTime.EndPoints
         {
             if (request.User.Identity.IsAuthenticated)
             {
-                var username = request.User.Identity.Name;
+                user = (User)HttpContext.Current.User;
+                                
+                connectionLookup.Add(user.Id, connectionId);
 
-                connectionLookup.Add(username, connectionId);
-
-                var userId = GetUserId(username);
-                var tasks = taskDistributor.GetTasksForUser(userId);
+                var tasks = taskDistributor.GetTasksForUser(user.Id);
 
                 if(tasks.Count() > 0) 
                 {
@@ -43,12 +43,12 @@ namespace RealTime.EndPoints
                 }
             }
 
-            return null;
+            return DoNothing();
         }
 
         protected override Task OnDisconnectAsync(string connectionId)
         {            
-            connectionLookup.Remove(connectionId);
+            connectionLookup.RemoveConnection(connectionId);
 
             return Connection.Broadcast("connection severed");
         }
@@ -57,9 +57,9 @@ namespace RealTime.EndPoints
         {
             if (request.User.Identity.IsAuthenticated)
             {
-                var username = request.User.Identity.Name;
+                var user = (User)HttpContext.Current.User;
 
-                connectionLookup.Update(username, connectionId);
+                connectionLookup.Update(user.Id, connectionId);
             }
             else 
             {
@@ -75,22 +75,25 @@ namespace RealTime.EndPoints
             var command = messageParts[0];
             var payload = messageParts[1];
 
-            var user = connectionLookup.GetUserForConnection(connectionId);
-            var userId = GetUserId(user);
+            var userId = connectionLookup.GetUserForConnection(connectionId);
 
-            switch (command) 
+            if (userId.HasValue) 
             {
-                case "starttask":
-                    StartTask(userId, payload);
-                    break;
-                case "aborttask":
-                    AbortTask(userId, payload);
-                    break;
-                default:
-                    break;
-            }
+                switch (command)
+                {
+                    case "starttask":
+                        StartTask(userId.Value, payload);
+                        break;
+                    case "aborttask":
+                        AbortTask(userId.Value, payload);
+                        break;
+                    default:
+                        break;
+                }
+            
+            }            
 
-            return null;
+            return DoNothing();
         }
 
         private void AbortTask(int userId, string payload)
@@ -114,11 +117,6 @@ namespace RealTime.EndPoints
                 m.UserId = userId;
             });
         }
- 
-        private int GetUserId(string username) 
-        {
-            throw new NotImplementedException();
-        }
 
         private void SendMessage(string connectionId, string messageType, object messageContent)
         {
@@ -126,6 +124,11 @@ namespace RealTime.EndPoints
             var message = string.Format("{0}/{1}", messageType, serialized);
 
             Connection.Send(connectionId, message);
-        }   
+        }
+
+        private Task DoNothing() 
+        {
+            return new Task(() => { });
+        }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using Messages;
 using NServiceBus;
+using System.Web.Mvc;
 
 namespace RealTime.MessageHandlers
 {
@@ -11,16 +12,13 @@ namespace RealTime.MessageHandlers
                                         IHandleMessages<TaskWasAborted>, IHandleMessages<TaskWasCompleted>
     {
         private IDictionary<int, TaskQueue> taskQueues = new Dictionary<int, TaskQueue>();
-        private IUserAccountService userAccountService;
-
+        
         public TaskDistributor(INotifyUsersOfTasks taskNotificaionService, IUserAccountService userAccountService) 
         {
-            this.userAccountService = userAccountService;
-
-            InitializeQueues(taskNotificaionService);
+            InitializeQueues(taskNotificaionService, userAccountService);
         }
 
-        private void InitializeQueues(INotifyUsersOfTasks taskNotificationService)
+        private void InitializeQueues(INotifyUsersOfTasks taskNotificationService, IUserAccountService userAccountService)
         {
             foreach (var userId in userAccountService.GetAllUserIds())
             {

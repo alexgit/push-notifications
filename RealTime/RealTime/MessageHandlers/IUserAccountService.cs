@@ -9,4 +9,12 @@ namespace RealTime.MessageHandlers
     {
         int[] GetAllUserIds();
     }
+
+    public class DummyUserAccountService : IUserAccountService
+    {
+        public int[] GetAllUserIds()
+        {
+            return Enumerable.Range(1, 20).ToArray();
+        }
+    }
 }

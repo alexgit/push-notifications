@@ -8,47 +8,51 @@ namespace RealTime.EndPoints
 {
     public class ConnectionLookup
     {
-        private ConcurrentDictionary<string, string> userToConnection = new ConcurrentDictionary<string, string>();
-        private ConcurrentDictionary<string, string> connectionToUser = new ConcurrentDictionary<string, string>();
+        private ConcurrentDictionary<int, string> userToConnection = new ConcurrentDictionary<int, string>();
+        private ConcurrentDictionary<string, int> connectionToUser = new ConcurrentDictionary<string, int>();
 
-        public void Add(string username, string connectionId) 
+        public void Add(int userId, string connectionId) 
         {
-            userToConnection.TryAdd(username, connectionId);
-            connectionToUser.TryAdd(connectionId, username);            
+            if (!userToConnection.TryAdd(userId, connectionId)) {
+                userToConnection[userId] = connectionId;
+            }
+            if (!connectionToUser.TryAdd(connectionId, userId)) {
+                connectionToUser[connectionId] = userId;
+            }
         }
 
-        public void Update(string username, string connectionId) 
+        public void Update(int userId, string connectionId) 
         {
-            userToConnection[username] = connectionId;
-            connectionToUser[connectionId] = username;
+            userToConnection[userId] = connectionId;
+            connectionToUser[connectionId] = userId;
         }
 
-        public string GetConnectionForUser(string username) 
+        public string GetConnectionForUser(int userId) 
         {
             string connectionId = null;
-            userToConnection.TryGetValue(username, out connectionId);
+            userToConnection.TryGetValue(userId, out connectionId);
 
             return connectionId;
         }
 
-        public string GetUserForConnection(string connectionId) 
+        public int? GetUserForConnection(string connectionId) 
         {
-            string username = null;
-            connectionToUser.TryGetValue(connectionId, out username);
+            int userId = 0;
+            connectionToUser.TryGetValue(connectionId, out userId);
 
-            return username;
+            return userId == 0 ? null : new Nullable<int>(userId);
         }
 
-        public void Remove(string username) 
+        public void Remove(int userId) 
         {
             string connectionId = null;
-            userToConnection.TryRemove(username, out connectionId);
+            userToConnection.TryRemove(userId, out connectionId);
         }
 
         public void RemoveConnection(string connectionId) 
         {
-            string username = null;
-            connectionToUser.TryRemove(connectionId, out username);
+            int userId = 0;
+            connectionToUser.TryRemove(connectionId, out userId);
         }
     }
 }

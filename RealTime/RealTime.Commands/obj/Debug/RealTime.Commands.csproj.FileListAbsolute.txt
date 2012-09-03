@@ -1,0 +1,7 @@
+E:\projects\csharp\realtime\RealTime\RealTime.Commands\bin\Debug\RealTime.Commands.dll
+E:\projects\csharp\realtime\RealTime\RealTime.Commands\bin\Debug\RealTime.Commands.pdb
+E:\projects\csharp\realtime\RealTime\RealTime.Commands\bin\Debug\NServiceBus.dll
+E:\projects\csharp\realtime\RealTime\RealTime.Commands\bin\Debug\NServiceBus.xml
+E:\projects\csharp\realtime\RealTime\RealTime.Commands\obj\Debug\ResolveAssemblyReference.cache
+E:\projects\csharp\realtime\RealTime\RealTime.Commands\obj\Debug\RealTime.Commands.dll
+E:\projects\csharp\realtime\RealTime\RealTime.Commands\obj\Debug\RealTime.Commands.pdb

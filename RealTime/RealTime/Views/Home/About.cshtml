@@ -2,14 +2,30 @@
     ViewBag.Title = "About";
 }
 
+<script type="text/javascript">
+    var createTaskLink = '@Url.Action("CreateTask", "Home")';
+</script>
+
+<style>
+    div.task-in-progress {
+        background-color: yellow;
+    }
+    
+    div.task-completed {
+        background-color: green;
+    }
+</style>
+
 <hgroup class="title">
     <h1>@ViewBag.Title.</h1>
     <h2>Some page here</h2>
 </hgroup>
 
-<div id="things-container">
-    <div data-bind="template: { name: 'thing-template', foreach: things }"></div>
+<div id="task-container">
+    <div data-bind="template: { name: 'task-template', foreach: tasks }"></div>
 </div>
+
+<button data-bind="click: createTask">Create task</button>
 
 <aside>
     <h3>Aside Title</h3>
@@ -24,14 +40,14 @@
     </ul>
 </aside>
 
-<script id="thing-template" type="text/html">
-    <div>
-        <input type="hidden" data-bind="attr: { value: Id }" />
-        Title: ${Title} <br/>
-        Time: ${Time} <br/>
+<script id="task-template" type="text/html">
+    <div data-bind="css: { 'task-in-progress' : inProgress, 'task-completed' : completed }">
+        <input type="hidden" data-bind="attr: { value: id }" />
+        Description: ${description} <br/>        
         <p>
-            Content: ${Content} <br/>
+            <a href="${actionurl}">Action</a> <br/>
         </p>
-        <button data-bind="click: $parent.handle">Handle</button>
+        Handled by: ${handledBy} <br/>
+        <button data-bind="click: $parent.starttask">Handle</button>
     </div>
 </script>

@@ -1,0 +1,11 @@
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\Messages.dll
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\Messages.pdb
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\log4net.dll
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\NServiceBus.Core.dll
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\NServiceBus.dll
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\log4net.xml
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\NServiceBus.xml
+E:\projects\csharp\realtime\RealTime\Messages\bin\Debug\NServiceBus.Core.xml
+E:\projects\csharp\realtime\RealTime\Messages\obj\Debug\ResolveAssemblyReference.cache
+E:\projects\csharp\realtime\RealTime\Messages\obj\Debug\Messages.dll
+E:\projects\csharp\realtime\RealTime\Messages\obj\Debug\Messages.pdb

@@ -24,7 +24,7 @@ namespace RealTime.EndPoints
 
         public void NotifyNewTask(int userToNotify, UserTask task)
         {
-            var connection = connectionLookup.GetConnectionForUser(GetUsername(userToNotify));
+            var connection = connectionLookup.GetConnectionForUser(userToNotify);
 
             if (connection != null)
                 SendMessage(connection, "newtask", task);
@@ -32,7 +32,7 @@ namespace RealTime.EndPoints
 
         public void NotifyTaskStarted(int userToNotify, int userWhoStartedTask, Guid taskId)
         {
-            var connection = connectionLookup.GetConnectionForUser(GetUsername(userToNotify));
+            var connection = connectionLookup.GetConnectionForUser(userToNotify);
 
             if (connection != null)
                 SendMessage(connection, "taskstarted", new { taskId });
@@ -40,7 +40,7 @@ namespace RealTime.EndPoints
 
         public void NotifyTaskAborted(int userToNotify, int userWhoAbortedTask, Guid taskId)
         {
-            var connection = connectionLookup.GetConnectionForUser(GetUsername(userToNotify));
+            var connection = connectionLookup.GetConnectionForUser(userToNotify);
 
             if (connection != null)
                 SendMessage(connection, "taskaborted", new { taskId });
@@ -48,7 +48,7 @@ namespace RealTime.EndPoints
 
         public void NotifyTaskCompleted(int userToNotify, int userWhoCompletedTask, Guid taskId)
         {
-            var connection = connectionLookup.GetConnectionForUser(GetUsername(userToNotify));
+            var connection = connectionLookup.GetConnectionForUser(userToNotify);
 
             if (connection != null)
                 SendMessage(connection, "taskcompleted", new { taskId });
@@ -60,11 +60,6 @@ namespace RealTime.EndPoints
             var message = string.Format("{0}/{1}", messageType, serialized);
 
             GetConnection().Send(connectionId, message);
-        }
-
-        private string GetUsername(int userId)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -13,9 +13,12 @@ namespace RealTime.UserAccounts
                 userDTO.LastPasswordChangedDate, userDTO.LastLockoutDate) 
         {
             Password = userDTO.Password;
+            Id = userDTO.Id;
         }
 
         public string Password { get; private set; }
+
+        public int Id { get; private set; }
 
         public override string GetPassword()
         {
@@ -40,6 +43,7 @@ namespace RealTime.UserAccounts
 
     public struct UserDTO 
     {
+        public int Id { get; set; }
         public string Comment { get; set; }
         public DateTime CreationDate { get; set; }
         public string Email { get; set; }
@@ -54,6 +58,6 @@ namespace RealTime.UserAccounts
         public string ProviderName { get; set; }
         public object ProviderUserKey { get; set; }
         public string UserName { get; set; }
-        public string Password { get; set; }
+        public string Password { get; set; }        
     }
 }

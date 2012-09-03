@@ -8,6 +8,16 @@ using System.Web.Optimization;
 using System.Web.Routing;
 using SignalR;
 using RealTime.EndPoints;
+using RealTime.MessageHandlers;
+using NServiceBus;
+using Castle.Windsor;
+using System.Web.Security;
+using Newtonsoft.Json;
+using RealTime.Models;
+using Castle.MicroKernel.Registration;
+using System.Reflection;
+using log4net.Appender;
+using log4net.Core;
 
 namespace RealTime
 {
@@ -16,6 +26,9 @@ namespace RealTime
 
     public class MvcApplication : System.Web.HttpApplication
     {
+        public IBus Bus { get; private set; }
+        public IWindsorContainer Container { get; private set; }
+
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
             filters.Add(new HandleErrorAttribute());
@@ -42,6 +55,12 @@ namespace RealTime
 
         protected void Application_Start()
         {
+            ConfigureCastleWindsor();
+            ConfigureNServiceBus();
+            SetupTaskNotificationServices();
+
+            ControllerBuilder.Current.SetControllerFactory(new MyControllerFactory(Container));
+
             AreaRegistration.RegisterAllAreas();
 
             RegisterGlobalFilters(GlobalFilters.Filters);
@@ -49,5 +68,110 @@ namespace RealTime
 
             BundleTable.Bundles.RegisterTemplateBundles();            
         }
+
+        protected void Application_AuthenticateRequest(Object sender, EventArgs e) 
+        {
+            HttpCookie authCookie = Request.Cookies[FormsAuthentication.FormsCookieName];
+
+            if (authCookie != null)
+            {
+                FormsAuthenticationTicket authTicket = FormsAuthentication.Decrypt(authCookie.Value);
+                var userData = JsonConvert.DeserializeObject<UserSerializeModel>(authTicket.UserData);
+                
+                if(userData != null) 
+                {
+                    User newUser = new User(userData.Id, userData.Username);
+                    HttpContext.Current.User = newUser;                
+                }
+            }
+        }
+
+        private void ConfigureCastleWindsor()
+        {
+            Container = new WindsorContainer();
+
+            Container.Register(Component.For<IControllerActivator>()
+                .UsingFactoryMethod<MyControllerActivator>((a, b) => new MyControllerActivator(Container))
+                    .LifeStyle.Is(Castle.Core.LifestyleType.Singleton));
+
+            Container.Register(Component.For<IControllerFactory>()
+                .UsingFactoryMethod<MyControllerFactory>((a, b) => new MyControllerFactory(Container))
+                    .LifeStyle.Is(Castle.Core.LifestyleType.Singleton));            
+
+            Container.Register(AllTypes.FromThisAssembly().BasedOn<IController>().LifestyleTransient());            
+        }
+
+        private void ConfigureNServiceBus()
+        {
+            var appender = new RollingFileAppender 
+            {
+                File = @"c:\log.txt",                
+                MaximumFileSize = "100MB",
+                MaxSizeRollBackups = 5,
+                Threshold = Level.Debug
+            };
+
+            Bus = NServiceBus.Configure.With()
+                                        .Log4Net(appender)
+                                        .CastleWindsorBuilder(Container)
+                                        .XmlSerializer()
+                                        .MsmqTransport()
+                                            .IsTransactional(false)
+                                            .PurgeOnStartup(true)                                        
+                                        .DefineEndpointName("realtime")
+                                        .UnicastBus()
+                                            .ImpersonateSender(false)
+                                            .LoadMessageHandlers()
+                                        .CreateBus()
+                                        .Start();
+        }
+
+        private void SetupTaskNotificationServices() 
+        {
+            var connectionLookup = new ConnectionLookup();
+            var taskNotifier = new TaskNotifier(connectionLookup);
+            var userAccountService = new DummyUserAccountService();
+            var taskDistributor = new TaskDistributor(taskNotifier, userAccountService);
+            
+
+            GlobalHost.DependencyResolver.Register(typeof(TaskDistributor), () => taskDistributor);
+            GlobalHost.DependencyResolver.Register(typeof(ConnectionLookup), () => connectionLookup);
+            GlobalHost.DependencyResolver.Register(typeof(IBus), () => Bus);
+            GlobalHost.DependencyResolver.Register(typeof(UserTaskEndpoint), () => new UserTaskEndpoint(taskDistributor, connectionLookup, Bus));
+
+            Container.Register(Component.For<IUserAccountService>().UsingFactoryMethod((a,b) => userAccountService));
+            Container.Register(Component.For<INotifyUsersOfTasks>().UsingFactoryMethod((a, b) => taskNotifier));
+            Container.Register(Component.For<TaskDistributor>().UsingFactoryMethod((a, b) => taskDistributor));
+        }
+        
+        public class MyControllerActivator : IControllerActivator 
+        {
+            private IWindsorContainer container;
+
+            public MyControllerActivator(IWindsorContainer container)
+            {
+                this.container = container;
+            }
+
+            public IController Create(RequestContext requestContext, Type controllerType)
+            {
+                return container.Resolve(controllerType) as IController;
+            }
+        }
+
+        public class MyControllerFactory : DefaultControllerFactory
+        {
+            private IWindsorContainer container;
+
+            public MyControllerFactory(IWindsorContainer container)
+            {
+                this.container = container;
+            }
+
+            protected override IController GetControllerInstance(RequestContext requestContext, Type controllerType)
+            {
+                return container.Resolve(controllerType) as IController;
+            }           
+        }        
     }
 }

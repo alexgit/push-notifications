@@ -13,7 +13,7 @@ namespace RealTime.UserAccounts
     {
         private static string userAccountsFilename = @"c:\users.db";
 
-        private static IDictionary<string, MembershipUser> userDb = new ConcurrentDictionary<string, MembershipUser>();
+        private static IDictionary<string, SimpleMembershipUser> userDb = new ConcurrentDictionary<string, SimpleMembershipUser>();
 
         static SimpleMembershipProvider() 
         {
@@ -92,8 +92,11 @@ namespace RealTime.UserAccounts
 
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
+            var newId = userDb.Values.Count() + 1;
+
             var userDTO = new UserDTO 
             {
+                Id = newId,
                 ProviderName = "SimpleMembershipProvider",
                 UserName = username,
                 Password = password,
@@ -108,6 +111,7 @@ namespace RealTime.UserAccounts
                 LastLoginDate = DateTime.Now,
                 LastPasswordChangedDate = DateTime.MinValue
             };
+
             var newUser = new SimpleMembershipUser(userDTO);
 
             status = MembershipCreateStatus.Success;
@@ -249,7 +253,11 @@ namespace RealTime.UserAccounts
 
         public override void UpdateUser(MembershipUser user)
         {
-            userDb[user.UserName] = user;
+            var userToUpdate = userDb[user.UserName];
+            userToUpdate.Comment = user.Comment;
+            userToUpdate.Email = user.Email;
+            userToUpdate.IsApproved = user.IsApproved;            
+            userToUpdate.LastActivityDate = user.LastActivityDate;            
 
             SaveChanges();
         }
@@ -261,6 +269,11 @@ namespace RealTime.UserAccounts
             catch { }
 
             return user != null && user.GetPassword() == password;
-        }        
+        }
+
+        public static SimpleMembershipUser GetUser(string username) 
+        {
+            return userDb[username];
+        }
     }
 }

@@ -9,27 +9,33 @@ using Messages;
 
 namespace TaskAllocationService.MessageHandlers
 {
-    public class TaskSaga : Saga<Task>, ISagaStartedBy<ClientWasReferredFromLASARTeam>,
+    public class TaskSaga : Saga<Task>, ISagaStartedBy<ClientWasReferred>,
                                             IHandleMessages<StartTask>,
                                                 IHandleMessages<AbortTask>, 
-                                                    IHandleMessages<LASARReferralWasAccepted>,
+                                                    IHandleMessages<ReferralWasAccepted>,
                                                         IHandleTimeouts<TaskTimeout>
     {
         private readonly ITeamService teamService;
         private readonly IBus messageBus;
-        
-        public TaskSaga(ITeamService userLocationService) 
+
+        public TaskSaga() 
         {
-            this.teamService = userLocationService;
+
         }
 
-        public void Handle(ClientWasReferredFromLASARTeam message)
+        public TaskSaga(ITeamService userLocationService, IBus messageBus) 
+        {
+            this.teamService = userLocationService;
+            this.messageBus = messageBus;
+        }
+
+        public void Handle(ClientWasReferred message)
         {
             var taskId = Guid.NewGuid();
             this.Data = new Task
             {
                 TaskId = taskId,
-                ActionURL = string.Format("http://environment/providerservice/acceptlasarreferral.castle?taskId={0}&referralId={1}", taskId, message.ReferralId),
+                ActionURL = string.Format("acceptlasarreferral?taskId={0}&referralId={1}", taskId, message.ReferralId),
                 Description = "This is a LASAR referral from Team A bla bla",
                 Users = teamService.GetUsersForTeam(message.ToTeamId)
             };            
@@ -46,7 +52,7 @@ namespace TaskAllocationService.MessageHandlers
         {
             ConfigureMapping<TaskWasStarted>(x => x.TaskId, y => y.TaskId);
             ConfigureMapping<TaskWasAborted>(x => x.TaskId, y => y.TaskId);
-            ConfigureMapping<LASARReferralWasAccepted>(x => x.TaskId, y => y.TaskId);
+            ConfigureMapping<ReferralWasAccepted>(x => x.TaskId, y => y.TaskId);
         }
 
         public void Handle(StartTask message)
@@ -89,7 +95,7 @@ namespace TaskAllocationService.MessageHandlers
             });
         }
 
-        public void Handle(LASARReferralWasAccepted message)
+        public void Handle(ReferralWasAccepted message)
         {
             Data.Complete(message.AcceptedByUser);
             MarkAsComplete();

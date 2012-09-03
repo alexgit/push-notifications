@@ -1300,6 +1300,16 @@
             The encrypted value of this string
             </summary>
     </member>
+    <member name="P:NServiceBus.WireEncryptedString.EncryptedBase64Value">
+      <summary>
+            Only keept for backwards compatibility reasons
+            </summary>
+    </member>
+    <member name="P:NServiceBus.WireEncryptedString.Base64Iv">
+      <summary>
+            Only keept for backwards compatibility reasons
+            </summary>
+    </member>
     <member name="T:NServiceBus.EncryptedValue">
       <summary>
             Class used to represent an encrypted value with an initialization vector.

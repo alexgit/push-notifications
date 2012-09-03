@@ -5,6 +5,8 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Security;
 using RealTime.Models;
+using Newtonsoft.Json;
+using RealTime.UserAccounts;
 
 namespace RealTime.Controllers
 {
@@ -33,7 +35,21 @@ namespace RealTime.Controllers
             {
                 if (Membership.ValidateUser(model.UserName, model.Password))
                 {
-                    FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+                    var user = SimpleMembershipProvider.GetUser(model.UserName);
+
+                    var userModel = new UserSerializeModel
+                    {
+                        Id = user.Id,
+                        Username = user.UserName
+                    };
+
+                    var userData = JsonConvert.SerializeObject(userModel);
+
+                    var ticket = new FormsAuthenticationTicket(1, userModel.Username, DateTime.Now, DateTime.Now.AddMinutes(60), false, userData);
+                    string ecryptedTicket = FormsAuthentication.Encrypt(ticket);
+                    HttpCookie faCookie = new HttpCookie(FormsAuthentication.FormsCookieName, ecryptedTicket);
+                    Response.Cookies.Add(faCookie);
+
                     return Json(new { success = true, redirect = returnUrl });
                 }
                 else
@@ -57,7 +73,21 @@ namespace RealTime.Controllers
             {
                 if (Membership.ValidateUser(model.UserName, model.Password))
                 {
-                    FormsAuthentication.SetAuthCookie(model.UserName, model.RememberMe);
+                    var user = SimpleMembershipProvider.GetUser(model.UserName);
+
+                    var userModel = new UserSerializeModel 
+                    {
+                        Id = user.Id,
+                        Username = user.UserName
+                    };
+
+                    var userData = JsonConvert.SerializeObject(userModel);
+
+                    var ticket = new FormsAuthenticationTicket(1, userModel.Username, DateTime.Now, DateTime.Now.AddMinutes(60), false, userData);
+                    string ecryptedTicket = FormsAuthentication.Encrypt(ticket);
+                    HttpCookie faCookie = new HttpCookie(FormsAuthentication.FormsCookieName, ecryptedTicket);
+                    Response.Cookies.Add(faCookie);
+                    
                     if (Url.IsLocalUrl(returnUrl))
                     {
                         return Redirect(returnUrl);
@@ -75,6 +105,11 @@ namespace RealTime.Controllers
 
             // If we got this far, something failed, redisplay form
             return View(model);
+        }
+
+        private User GetUser(string p)
+        {
+            throw new NotImplementedException();
         }
 
         //
@@ -262,6 +297,6 @@ namespace RealTime.Controllers
                     return "An unknown error occurred. Please verify your entry and try again. If the problem persists, please contact your system administrator.";
             }
         }
-        #endregion
+        #endregion        
     }
 }

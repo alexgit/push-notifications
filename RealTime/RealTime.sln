@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealTime.TaskAllocationServ
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealTime.Commands", "RealTime.Commands\RealTime.Commands.csproj", "{43D7BFE2-6376-415D-8D34-A7C88F0F63E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RealTime.TaskAllocationService.Terminal", "RealTime.TaskAllocationService.Terminal\RealTime.TaskAllocationService.Terminal.csproj", "{084E9D8F-5AAC-420E-8707-B212DF629403}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,6 +33,10 @@ Global
 		{43D7BFE2-6376-415D-8D34-A7C88F0F63E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{43D7BFE2-6376-415D-8D34-A7C88F0F63E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{43D7BFE2-6376-415D-8D34-A7C88F0F63E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{084E9D8F-5AAC-420E-8707-B212DF629403}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{084E9D8F-5AAC-420E-8707-B212DF629403}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{084E9D8F-5AAC-420E-8707-B212DF629403}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{084E9D8F-5AAC-420E-8707-B212DF629403}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

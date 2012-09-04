@@ -1,0 +1,17 @@
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\RealTime.TaskAllocationService.Terminal.dll.config
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\RealTime.TaskAllocationService.Terminal.dll
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\RealTime.TaskAllocationService.Terminal.pdb
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\log4net.dll
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\Messages.dll
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\NServiceBus.Core.dll
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\NServiceBus.dll
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\NServiceBus.Host.exe
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\Messages.pdb
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\log4net.xml
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\NServiceBus.xml
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\NServiceBus.Core.xml
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\NServiceBus.Host.pdb
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\bin\Debug\NServiceBus.Host.xml
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\obj\Debug\ResolveAssemblyReference.cache
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\obj\Debug\RealTime.TaskAllocationService.Terminal.dll
+E:\projects\csharp\realtime\RealTime\RealTime.TaskAllocationService.Terminal\obj\Debug\RealTime.TaskAllocationService.Terminal.pdb

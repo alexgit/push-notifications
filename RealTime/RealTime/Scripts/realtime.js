@@ -14,7 +14,24 @@ $(function () {
         this.completed = ko.observable(false);
     }
 
-    $.extend(Task.prototype, {
+    function createTask(id, description, actionurl) {
+        var task;
+
+        if(arguments.length == 1) {
+            var dto = arguments[0];
+            task = new Task(dto.Id, dto.Description, dto.actionurl, false, null);
+        } else {
+            task = new Task(id, description, actionurl, false, null);
+        }        
+
+        task.newTask = ko.computed(function() {
+            return !task.inProgress() && !task.completed();
+        });
+
+        return task;
+    }    
+
+    ko.utils.extend(Task.prototype, {
         Start : function() {
             connection.send('starttask/' + this.id);
             this.inProgress(true);
@@ -41,7 +58,7 @@ $(function () {
         tasks: ko.observableArray(),
 
         starttask: function (task) {
-            task.Start();            
+            task.Start();
         },
         aborttask: function (task) {
             task.Abort();            
@@ -55,10 +72,10 @@ $(function () {
         },
         messageHandlers: {
             'tasklist': function(taskList) {
-                viewModel.tasks(taskList)
+                viewModel.tasks(ko.utils.arrayMap(taskList, createTask));
             },
             'newtask': function (task) {
-                var newTask = new Task(task.Id, task.Description, task.ActionUrl, false, null);
+                var newTask = createTask(task.Id, task.Description, task.ActionUrl);
                 viewModel.tasks.push(newTask);
             },
             'taskaborted': function (t) {

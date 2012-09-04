@@ -55,10 +55,9 @@ namespace RealTime
 
         protected void Application_Start()
         {
-            ConfigureCastleWindsor();
+            ConfigureIoC();
             ConfigureNServiceBus();
-            SetupTaskNotificationServices();
-
+            
             ControllerBuilder.Current.SetControllerFactory(new MyControllerFactory(Container));
 
             AreaRegistration.RegisterAllAreas();
@@ -86,9 +85,18 @@ namespace RealTime
             }
         }
 
-        private void ConfigureCastleWindsor()
+        private void ConfigureIoC()
         {
             Container = new WindsorContainer();
+
+            var connectionLookup = new ConnectionLookup();
+            var taskNotifier = new TaskNotifier(connectionLookup);
+            var userAccountService = new DummyUserAccountService();
+            var taskDistributor = new TaskDistributor(taskNotifier, userAccountService);
+                        
+            Container.Register(Component.For<IUserAccountService>().Instance(userAccountService).LifestyleSingleton());
+            Container.Register(Component.For<INotifyUsersOfTasks>().Instance(taskNotifier).LifestyleSingleton());
+            Container.Register(Component.For<TaskDistributor>().Instance(taskDistributor).LifestyleSingleton());            
 
             Container.Register(Component.For<IControllerActivator>()
                 .UsingFactoryMethod<MyControllerActivator>((a, b) => new MyControllerActivator(Container))
@@ -98,7 +106,12 @@ namespace RealTime
                 .UsingFactoryMethod<MyControllerFactory>((a, b) => new MyControllerFactory(Container))
                     .LifeStyle.Is(Castle.Core.LifestyleType.Singleton));            
 
-            Container.Register(AllTypes.FromThisAssembly().BasedOn<IController>().LifestyleTransient());            
+            Container.Register(AllTypes.FromThisAssembly().BasedOn<IController>().LifestyleTransient());
+
+            GlobalHost.DependencyResolver.Register(typeof(TaskDistributor), () => taskDistributor);
+            GlobalHost.DependencyResolver.Register(typeof(ConnectionLookup), () => connectionLookup);
+            GlobalHost.DependencyResolver.Register(typeof(IBus), () => Bus);
+            GlobalHost.DependencyResolver.Register(typeof(UserTaskEndpoint), () => new UserTaskEndpoint(taskDistributor, connectionLookup, Bus));                      
         }
 
         private void ConfigureNServiceBus()
@@ -124,25 +137,7 @@ namespace RealTime
                                             .LoadMessageHandlers()
                                         .CreateBus()
                                         .Start();
-        }
-
-        private void SetupTaskNotificationServices() 
-        {
-            var connectionLookup = new ConnectionLookup();
-            var taskNotifier = new TaskNotifier(connectionLookup);
-            var userAccountService = new DummyUserAccountService();
-            var taskDistributor = new TaskDistributor(taskNotifier, userAccountService);
-            
-
-            GlobalHost.DependencyResolver.Register(typeof(TaskDistributor), () => taskDistributor);
-            GlobalHost.DependencyResolver.Register(typeof(ConnectionLookup), () => connectionLookup);
-            GlobalHost.DependencyResolver.Register(typeof(IBus), () => Bus);
-            GlobalHost.DependencyResolver.Register(typeof(UserTaskEndpoint), () => new UserTaskEndpoint(taskDistributor, connectionLookup, Bus));
-
-            Container.Register(Component.For<IUserAccountService>().UsingFactoryMethod((a,b) => userAccountService));
-            Container.Register(Component.For<INotifyUsersOfTasks>().UsingFactoryMethod((a, b) => taskNotifier));
-            Container.Register(Component.For<TaskDistributor>().UsingFactoryMethod((a, b) => taskDistributor));
-        }
+        }        
         
         public class MyControllerActivator : IControllerActivator 
         {

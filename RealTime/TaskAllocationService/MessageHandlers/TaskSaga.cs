@@ -30,7 +30,7 @@ namespace TaskAllocationService.MessageHandlers
         }
 
         public void Handle(ClientWasReferred message)
-        {
+        {           
             var taskId = Guid.NewGuid();
             this.Data = new Task
             {
@@ -45,7 +45,7 @@ namespace TaskAllocationService.MessageHandlers
                 m.Users = Data.Users;
                 m.Description = Data.Description;
                 m.ActionURL = Data.ActionURL;
-            });
+            });            
         }
 
         public override void ConfigureHowToFindSaga()

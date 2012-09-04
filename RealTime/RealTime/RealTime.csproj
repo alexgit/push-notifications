@@ -153,7 +153,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\AccountController.cs" />
-    <Compile Include="Controllers\CreateTask.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="EndPoints\ConnectionLookup.cs" />
     <Compile Include="EndPoints\TaskNotifier.cs" />

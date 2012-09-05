@@ -50,7 +50,12 @@ namespace RealTime.MessageHandlers
         public UserTask[] GetAll() 
         {
             return tasks.ToArray();
-        }        
+        }
+
+        public bool Contains(Guid taskId) 
+        {
+            return tasks.Any(x => x.Id == taskId);
+        }
 
         internal void TaskAborted(Guid taskId)
         {

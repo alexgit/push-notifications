@@ -7,16 +7,16 @@
 </script>
 
 <style>
-    div.task-in-progress {
-        background-color: yellow;
+    div.task.grey {
+        background-color: grey;
     }
     
-    div.task-completed {
-        background-color: green;
+    div.task.yellow {
+        background-color: yellow;
     }
 
-    div.task-completed {
-        background-color: grey;
+    div.task.geen {
+        background-color: green;
     }
 </style>
 
@@ -43,13 +43,12 @@
 </aside>
 
 <script id="task-template" type="text/html">
-    <div>
+    <div class="task" data-bind="css: { 'grey' : newTask, 'yellow' : inProgress, 'green': completed }">
         Description: ${description} <br/>        
         <p>
             <a href="#">Action</a> <br/>
         </p>
         Handled by: ${handledBy} <br/>
-        <button data-bind="click: $parent.starttask">Handle</button>
-        <button data-bind="click: $parent.completetask">Complete</button>
+        <button data-bind="click: $parent.starttask">Handle</button>        
     </div>
 </script>

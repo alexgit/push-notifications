@@ -53,7 +53,7 @@ $(function () {
         }
     });    
         
-    var viewModel = {
+    viewModel = {
         tasks: ko.observableArray(),
 
         starttask: function (task) {

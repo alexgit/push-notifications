@@ -69,7 +69,8 @@ namespace RealTime.MessageHandlers
 
             foreach (var queue in taskQueues.Values)
             {
-                queue.Remove(taskId);
+                if(queue.Contains(taskId))
+                    queue.Remove(taskId);
             }
         }
 

@@ -43,10 +43,9 @@ $(function () {
             this.handledBy('');
         },
         Complete : function() {
-            connection.send('completetask/' + this.id);
             this.inProgress(false);
             this.handledBy('');
-            this.completed(true);            
+            this.completed(true);
         },
         StartedByOther : function() {
             this.inProgress(true);
@@ -62,11 +61,7 @@ $(function () {
         },
         aborttask: function (task) {
             task.Abort();            
-        },
-        completetask: function(task) {
-            task.Complete();            
-            setTimeout(function() { viewModel.tasks.remove(task); }, 60 * 1000);
-        },
+        },        
         handleMessage: function(message, payload) {
             return this.messageHandlers[message](payload);
         },
@@ -79,25 +74,26 @@ $(function () {
                 viewModel.tasks.push(newTask);
             },
             'taskaborted': function (t) {
-                var found = ko.arrayFirst(viewModel.tasks(), function(task) {
-                    return task.id == t.id;
+                var found = ko.utils.arrayFirst(viewModel.tasks(), function(task) {
+                    return task.id == t.taskId;
                 });
 
                 found.Abort();
             },
             'taskstarted': function (t) {
-                var found = ko.arrayFirst(viewModel.tasks(), function(task) {
-                    return task.id == t.id;
+                var found = ko.utils.arrayFirst(viewModel.tasks(), function(task) {
+                    return task.id == t.taskId;
                 });
 
                 found.StartedByOther();
             },
             'taskcompleted': function (t) {
-                var found = ko.arrayFirst(viewModel.tasks(), function(task) {
-                    return task.id == t.id;
+                var found = ko.utils.arrayFirst(viewModel.tasks(), function(task) {
+                    return task.id == t.taskId;
                 });
 
                 found.Complete();
+                setTimeout(function() { viewModel.tasks.remove(found); }, 30 * 1000);
             }
         }
     };    

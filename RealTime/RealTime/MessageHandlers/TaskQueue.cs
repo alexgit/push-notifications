@@ -38,9 +38,12 @@ namespace RealTime.MessageHandlers
 
         public void TaskStarted(Guid taskId, int startedBy)
         {
-            var task = tasks.Where(x => x.Id == taskId).First();
-            task.Start(userId);
+            var task = tasks.Where(x => x.Id == taskId).FirstOrDefault();
 
+            if (task == null)
+                return;
+
+            task.Start(userId);
             taskNotificationService.NotifyTaskStarted(userId, startedBy, taskId);
         }
 

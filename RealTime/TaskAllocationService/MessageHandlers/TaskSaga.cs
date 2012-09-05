@@ -50,8 +50,8 @@ namespace TaskAllocationService.MessageHandlers
 
         public override void ConfigureHowToFindSaga()
         {
-            ConfigureMapping<TaskWasStarted>(x => x.TaskId, y => y.TaskId);
-            ConfigureMapping<TaskWasAborted>(x => x.TaskId, y => y.TaskId);
+            ConfigureMapping<StartTask>(x => x.TaskId, y => y.TaskId);
+            ConfigureMapping<AbortTask>(x => x.TaskId, y => y.TaskId);
             ConfigureMapping<ReferralWasAccepted>(x => x.TaskId, y => y.TaskId);
         }
 

@@ -116,7 +116,7 @@ namespace RealTime.EndPoints
                 m.TaskId = taskId;
                 m.UserId = userId;
             });
-        }
+        }        
 
         private void SendMessage(string connectionId, string messageType, object messageContent)
         {

@@ -9,7 +9,6 @@ using RealTime.Models;
 using RealTime.MessageHandlers;
 using NServiceBus;
 using Messages;
-using SignalR.Hubs;
 
 namespace RealTime.EndPoints
 {
@@ -18,8 +17,7 @@ namespace RealTime.EndPoints
         private readonly ConnectionLookup connectionLookup;
         private readonly TaskDistributor taskDistributor;
         private readonly IBus messageBus;
-        private User user;
-               
+                       
         public UserTaskEndpoint(TaskDistributor taskDistributor, ConnectionLookup connectionLookup, IBus messageBus) 
         {
             this.taskDistributor = taskDistributor;
@@ -29,10 +27,10 @@ namespace RealTime.EndPoints
 
         protected override Task OnConnectedAsync(IRequest request, string connectionId)
         {
-            if (request.User.Identity.IsAuthenticated)
-            {
-                user = (User)HttpContext.Current.User;
-                                
+            var user = HttpContext.Current.User as User;
+
+            if (user != null && user.Identity.IsAuthenticated)
+            {                                                 
                 connectionLookup.Add(user.Id, connectionId);
 
                 var tasks = taskDistributor.GetTasksForUser(user.Id);

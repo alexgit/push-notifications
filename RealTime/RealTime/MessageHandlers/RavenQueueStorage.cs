@@ -66,7 +66,9 @@ namespace RealTime.MessageHandlers
             {
                 var queue = session.Load<RavenTaskQueue>(userId) ?? new RavenTaskQueue(userId);
                     
-                queue.Tasks = new HashSet<UserTask>(userTasks);
+                if(userTasks.Count() > 0)
+                    queue.Tasks = new HashSet<UserTask>(userTasks);
+
                 session.Store(queue);
                 session.SaveChanges();
             }

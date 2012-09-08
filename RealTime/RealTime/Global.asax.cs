@@ -22,6 +22,7 @@ using RealTime.Infrastructure;
 using RealTime.UserAccounts;
 using Raven.Client.Embedded;
 using Raven.Client;
+using Raven.Client.Document;
 
 namespace RealTime
 {

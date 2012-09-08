@@ -21,19 +21,26 @@ namespace RealTime.TaskAllocationService.Terminal
                 {
                     var parts = line.Split(' ');
 
-                    var taskId = Guid.Parse(parts[1]);
+                    var correlationId = Guid.Parse(parts[1]);
                     var userId = int.Parse(parts[2]);
 
                     Bus.Publish<ReferralWasAccepted>(m =>
                     {
-                        m.TaskId = taskId; //todo: correlation here needs to happen on the referral id, not on the taskid
                         m.ReferralId = Guid.NewGuid();
                         m.AcceptedByTeam = 1;
                         m.AcceptedByUser = userId;
+
+                        m.CompletedBy = userId;
+                        m.CorrelationId = correlationId;
                     });
                 }
                 else if(line.StartsWith("new"))
                 {
+
+                    var data = line.Split(' ');
+
+                    var referralId = Guid.Parse(data[1]);
+
                     Bus.Publish<ClientWasReferred>(m =>
                     {
                         m.ClientId = 1;
@@ -43,8 +50,13 @@ namespace RealTime.TaskAllocationService.Terminal
                         m.Surname = "Pesci";
                         m.Referrer = "Test Referrer";
                         m.ReferralDate = DateTime.Now;
-                        m.ReferralId = Guid.NewGuid();
+                        m.ReferralId = referralId;
                         m.PrimaryProblemSubstance = "Crack";
+
+                        m.ActionUrl = "actionUrl";
+                        m.CorrelationId = referralId;
+                        m.Description = "Client XYZ was referred from team ABC.";
+                        m.Users = new[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
                     });
                 }                
             }

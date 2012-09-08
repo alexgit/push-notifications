@@ -15,7 +15,7 @@
         background-color: yellow;
     }
 
-    div.task.geen {
+    div.task.green {
         background-color: green;
     }
 </style>
@@ -49,6 +49,6 @@
             <a href="#">Action</a> <br/>
         </p>
         Handled by: ${handledBy} <br/>
-        <button data-bind="click: $parent.starttask">Handle</button>        
+        <button data-bind="click: $parent.starttask, enable: newTask">Handle</button>        
     </div>
 </script>

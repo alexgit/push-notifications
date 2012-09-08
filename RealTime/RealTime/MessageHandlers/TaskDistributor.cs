@@ -5,24 +5,28 @@ using System.Web;
 using Messages;
 using NServiceBus;
 using System.Web.Mvc;
+using RealTime.Infrastructure;
 
 namespace RealTime.MessageHandlers
 {
     public class TaskDistributor : IHandleMessages<TaskWasCreated>, IHandleMessages<TaskWasStarted>, 
-                                        IHandleMessages<TaskWasAborted>, IHandleMessages<TaskWasCompleted>
+                                        IHandleMessages<TaskWasAborted>, IHandleMessages<TaskWasCompleted>,
+                                            IReactToUserLoggedIn, IReactToUserLoggedOff, IReactToUserSessionTimeouts
     {
-        private IDictionary<int, TaskQueue> taskQueues = new Dictionary<int, TaskQueue>();
+        private IDictionary<int, ITaskQueue> taskQueues = new Dictionary<int, ITaskQueue>();
+        private IQueueFactory queueFactory;
         
-        public TaskDistributor(INotifyUsersOfTasks taskNotificaionService, IUserAccountService userAccountService) 
+        public TaskDistributor(IQueueFactory queueFactory, IUserAccountService userAccountService) 
         {
-            InitializeQueues(taskNotificaionService, userAccountService);
+            this.queueFactory = queueFactory;
+            InitializeQueues(userAccountService);
         }
 
-        private void InitializeQueues(INotifyUsersOfTasks taskNotificationService, IUserAccountService userAccountService)
+        private void InitializeQueues(IUserAccountService userAccountService)
         {
             foreach (var userId in userAccountService.GetAllUserIds())
             {
-                taskQueues.Add(userId, new TaskQueue(userId, taskNotificationService));
+                taskQueues.Add(userId, queueFactory.Create<OfflineTaskQueue>(userId));
             }
         }
 
@@ -34,7 +38,7 @@ namespace RealTime.MessageHandlers
                 {
                     Id = message.TaskId,
                     Description = message.Description,
-                    ActionUrl = message.ActionURL
+                    ActionUrl = message.ActionURL,
                 });
             }
         }
@@ -77,6 +81,67 @@ namespace RealTime.MessageHandlers
         public UserTask[] GetTasksForUser(int userId) 
         {
             return taskQueues[userId].GetAll();
+        }
+
+        public Action<UserAccounts.SimpleMembershipUser> OnLogin
+        {
+            get 
+            { 
+                return user => 
+                {
+                    var currentQueue = taskQueues[user.Id];
+
+                    SwapQueue(currentQueue).With<OnlineTaskQueue>();                    
+                }; 
+           } 
+        }
+
+        public Action<UserAccounts.SimpleMembershipUser> OnLoggedOff
+        {
+            get 
+            { 
+                return user => 
+                {
+                    var currentQueue = taskQueues[user.Id];
+
+                    SwapQueue(currentQueue).With<OfflineTaskQueue>();
+                }; 
+            }
+        }
+
+        public Action<UserAccounts.SimpleMembershipUser> OnSessionTimeout
+        {
+            get { return user => OnLoggedOff(user); }
+        }
+
+        private QueueSwapDescriptor SwapQueue(ITaskQueue currentQueue)
+        {
+            return new QueueSwapDescriptor(taskQueues, currentQueue, queueFactory);
+        }
+
+        private class QueueSwapDescriptor
+        {
+            private ITaskQueue queueToSwap;
+            private IDictionary<int, ITaskQueue> queues;
+            private IQueueFactory queueFactory;
+
+            public QueueSwapDescriptor(IDictionary<int, ITaskQueue> queues, ITaskQueue queueToSwap, IQueueFactory queueFactory) 
+            {
+                this.queueToSwap = queueToSwap;
+                this.queues = queues;
+                this.queueFactory = queueFactory;
+            }
+
+            public void With<T>() where T : ITaskQueue
+            {
+                var newQueue = queueFactory.Create<T>(queueToSwap.UserId);
+
+                newQueue.InitializeFrom(queueToSwap);
+                
+                queues[queueToSwap.UserId] = newQueue;
+                
+                queueToSwap = null;
+            }
         }
     }
 }

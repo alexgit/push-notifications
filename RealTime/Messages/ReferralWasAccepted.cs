@@ -6,10 +6,8 @@ using NServiceBus;
 
 namespace Messages
 {
-    public interface ReferralWasAccepted : IMessage
+    public interface ReferralWasAccepted : IMessage, ICompleteATask
     {
-        Guid TaskId { get; set; }
-
         Guid ReferralId { get; set; }
         
         int AcceptedByTeam { get; set; }

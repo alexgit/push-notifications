@@ -6,7 +6,7 @@ using NServiceBus;
 
 namespace Messages
 {
-    public interface ClientWasReferred : IMessage
+    public interface ClientWasReferred : IMessage, ICreateANewTask
     {
         int ClientId { get; set; }
         Guid ReferralId { get; set; }

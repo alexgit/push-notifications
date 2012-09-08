@@ -7,6 +7,7 @@ using System.Web.Security;
 using RealTime.Models;
 using Newtonsoft.Json;
 using RealTime.UserAccounts;
+using RealTime.Infrastructure;
 
 namespace RealTime.Controllers
 {
@@ -14,6 +15,14 @@ namespace RealTime.Controllers
     [Authorize]
     public class AccountController : Controller
     {
+        private IReactToUserLoggedIn loginListener;
+        private IReactToUserLoggedOff logoutListener;
+
+        public AccountController(IReactToUserLoggedIn loginListener, IReactToUserLoggedOff logoutListener)
+        {
+            this.loginListener = loginListener;
+            this.logoutListener = logoutListener;
+        }
 
         //
         // GET: /Account/Login
@@ -37,6 +46,8 @@ namespace RealTime.Controllers
                 {
                     var user = SimpleMembershipProvider.GetUser(model.UserName);
 
+                    loginListener.OnLogin.Invoke(user);
+                    
                     var userModel = new UserSerializeModel
                     {
                         Id = user.Id,
@@ -49,6 +60,8 @@ namespace RealTime.Controllers
                     string ecryptedTicket = FormsAuthentication.Encrypt(ticket);
                     HttpCookie faCookie = new HttpCookie(FormsAuthentication.FormsCookieName, ecryptedTicket);
                     Response.Cookies.Add(faCookie);
+
+                    Session["user"] = user;
 
                     return Json(new { success = true, redirect = returnUrl });
                 }
@@ -75,6 +88,8 @@ namespace RealTime.Controllers
                 {
                     var user = SimpleMembershipProvider.GetUser(model.UserName);
 
+                    loginListener.OnLogin.Invoke(user);
+                    
                     var userModel = new UserSerializeModel 
                     {
                         Id = user.Id,
@@ -87,6 +102,8 @@ namespace RealTime.Controllers
                     string ecryptedTicket = FormsAuthentication.Encrypt(ticket);
                     HttpCookie faCookie = new HttpCookie(FormsAuthentication.FormsCookieName, ecryptedTicket);
                     Response.Cookies.Add(faCookie);
+
+                    Session["user"] = user;
                     
                     if (Url.IsLocalUrl(returnUrl))
                     {
@@ -107,11 +124,6 @@ namespace RealTime.Controllers
             return View(model);
         }
 
-        private User GetUser(string p)
-        {
-            throw new NotImplementedException();
-        }
-
         //
         // GET: /Account/LogOff
 
@@ -119,6 +131,8 @@ namespace RealTime.Controllers
         {
             FormsAuthentication.SignOut();
 
+            logoutListener.OnLoggedOff.Invoke(SimpleMembershipProvider.GetUser(HttpContext.User.Identity.Name));
+            
             return RedirectToAction("Index", "Home");
         }
 

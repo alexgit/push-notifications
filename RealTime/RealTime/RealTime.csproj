@@ -52,7 +52,8 @@
       <Private>True</Private>
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
+    <Reference Include="Newtonsoft.Json, Version=4.0.8.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.4.5.8\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="NServiceBus, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
@@ -63,6 +64,15 @@
     </Reference>
     <Reference Include="NServiceBus.ObjectBuilder.CastleWindsor, Version=3.2.0.0, Culture=neutral, PublicKeyToken=9fc386479f8a226c, processorArchitecture=MSIL">
       <HintPath>..\packages\NServiceBus.CastleWindsor.3.2.8\lib\net40\NServiceBus.ObjectBuilder.CastleWindsor.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Client.Embedded">
+      <HintPath>..\packages\RavenDB\EmbeddedClient\Raven.Client.Embedded.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Client.Lightweight">
+      <HintPath>..\packages\RavenDB\EmbeddedClient\Raven.Client.Lightweight.dll</HintPath>
+    </Reference>
+    <Reference Include="Raven.Storage.Esent">
+      <HintPath>..\packages\RavenDB\EmbeddedClient\Raven.Storage.Esent.dll</HintPath>
     </Reference>
     <Reference Include="SignalR">
       <HintPath>..\packages\SignalR.Server.0.5.3\lib\net40\SignalR.dll</HintPath>
@@ -160,11 +170,23 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Infrastructure\IReactToUserSessionTimeouts.cs" />
+    <Compile Include="Infrastructure\IReactToUserLoggedOff.cs" />
+    <Compile Include="Infrastructure\IReactToUserLoggedIn.cs" />
+    <Compile Include="MessageHandlers\BaseTaskQueue.cs" />
+    <Compile Include="MessageHandlers\DefaultQueueFactory.cs" />
+    <Compile Include="MessageHandlers\InMemoryQueueStorage.cs" />
     <Compile Include="MessageHandlers\INotifyUsersOfTasks.cs" />
+    <Compile Include="MessageHandlers\IQueueFactory.cs" />
+    <Compile Include="MessageHandlers\IQueueStorage.cs" />
+    <Compile Include="MessageHandlers\ITaskQueue.cs" />
     <Compile Include="MessageHandlers\IUserAccountService.cs" />
+    <Compile Include="MessageHandlers\NotifyingTaskQueue.cs" />
+    <Compile Include="MessageHandlers\OfflineTaskQueue.cs" />
+    <Compile Include="MessageHandlers\RavenQueueStorage.cs" />
     <Compile Include="MessageHandlers\Task.cs" />
     <Compile Include="MessageHandlers\TaskDistributor.cs" />
-    <Compile Include="MessageHandlers\TaskQueue.cs" />
+    <Compile Include="MessageHandlers\OnlineTaskQueue.cs" />
     <Compile Include="Models\AccountModels.cs" />
     <Compile Include="Models\Thing.cs" />
     <Compile Include="Models\User.cs" />

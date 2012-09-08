@@ -9,10 +9,10 @@ using Messages;
 
 namespace TaskAllocationService.MessageHandlers
 {
-    public class TaskSaga : Saga<Task>, ISagaStartedBy<ClientWasReferred>,
+    public class TaskSaga : Saga<TaskData>, ISagaStartedBy<ICreateANewTask>,
                                             IHandleMessages<StartTask>,
                                                 IHandleMessages<AbortTask>, 
-                                                    IHandleMessages<ReferralWasAccepted>,
+                                                    IHandleMessages<ICompleteATask>,
                                                         IHandleTimeouts<TaskTimeout>
     {
         private readonly ITeamService teamService;
@@ -29,16 +29,17 @@ namespace TaskAllocationService.MessageHandlers
             this.messageBus = messageBus;
         }
 
-        public void Handle(ClientWasReferred message)
+        public void Handle(ICreateANewTask message)
         {           
             var taskId = Guid.NewGuid();
-            this.Data = new Task
+            this.Data = new TaskData
             {
                 TaskId = taskId,
-                ActionURL = string.Format("acceptlasarreferral?taskId={0}&referralId={1}", taskId, message.ReferralId),
-                Description = "This is a LASAR referral from Team A bla bla",
-                Users = teamService.GetUsersForTeam(message.ToTeamId)
-            };            
+                ActionURL = message.ActionUrl,
+                Description = message.Description,
+                Users = message.Users,
+                CorrelationId = message.CorrelationId
+            };
 
             messageBus.Publish<TaskWasCreated>(m => {
                 m.TaskId = Data.TaskId;
@@ -52,7 +53,7 @@ namespace TaskAllocationService.MessageHandlers
         {
             ConfigureMapping<StartTask>(x => x.TaskId, y => y.TaskId);
             ConfigureMapping<AbortTask>(x => x.TaskId, y => y.TaskId);
-            ConfigureMapping<ReferralWasAccepted>(x => x.TaskId, y => y.TaskId);
+            ConfigureMapping<ICompleteATask>(x => x.CorrelationId, y => y.CorrelationId);
         }
 
         public void Handle(StartTask message)
@@ -95,14 +96,14 @@ namespace TaskAllocationService.MessageHandlers
             });
         }
 
-        public void Handle(ReferralWasAccepted message)
+        public void Handle(ICompleteATask message)
         {
-            Data.Complete(message.AcceptedByUser);
+            Data.Complete(message.CompletedBy);
             MarkAsComplete();
 
             messageBus.Publish<TaskWasCompleted>(m => {
-                m.TaskId = message.TaskId;
-                m.CompletedBy = message.AcceptedByUser;
+                m.TaskId = Data.TaskId;
+                m.CompletedBy = message.CompletedBy;
             });
         }
 

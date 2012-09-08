@@ -7,7 +7,7 @@ using NServiceBus.Saga;
 
 namespace TaskAllocationService
 {
-    public class Task : IContainSagaData
+    public class TaskData : IContainSagaData
     {
         public Guid Id { get; set; }
         
@@ -15,7 +15,7 @@ namespace TaskAllocationService
 
         public string Originator { get; set; }
 
-
+        public Guid CorrelationId { get; set; }
 
         public Guid TaskId { get; set; }
 

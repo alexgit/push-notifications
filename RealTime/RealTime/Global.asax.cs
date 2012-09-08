@@ -18,6 +18,10 @@ using Castle.MicroKernel.Registration;
 using System.Reflection;
 using log4net.Appender;
 using log4net.Core;
+using RealTime.Infrastructure;
+using RealTime.UserAccounts;
+using Raven.Client.Embedded;
+using Raven.Client;
 
 namespace RealTime
 {
@@ -28,6 +32,7 @@ namespace RealTime
     {
         public IBus Bus { get; private set; }
         public IWindsorContainer Container { get; private set; }
+        private IReactToUserSessionTimeouts sessionTimeoutEventSink;
 
         public static void RegisterGlobalFilters(GlobalFilterCollection filters)
         {
@@ -56,7 +61,7 @@ namespace RealTime
         protected void Application_Start()
         {
             ConfigureIoC();
-            ConfigureNServiceBus();
+            ConfigureNServiceBus();            
             
             ControllerBuilder.Current.SetControllerFactory(new MyControllerFactory(Container));
 
@@ -80,33 +85,41 @@ namespace RealTime
                 if(userData != null) 
                 {
                     User newUser = new User(userData.Id, userData.Username);
-                    HttpContext.Current.User = newUser;                
+                    HttpContext.Current.User = newUser;
                 }
             }
+        }
+
+        protected void Session_End() 
+        {
+            var user = Session["user"] as SimpleMembershipUser;
+            sessionTimeoutEventSink.OnSessionTimeout(user);
         }
 
         private void ConfigureIoC()
         {
             Container = new WindsorContainer();
 
+            var documentStore = new EmbeddableDocumentStore { DataDirectory = "../data" };
+            documentStore.Initialize();
+            
             var connectionLookup = new ConnectionLookup();
             var taskNotifier = new TaskNotifier(connectionLookup);
+            var queueFactory = new DefaultQueueFactory(taskNotifier, documentStore);
             var userAccountService = new DummyUserAccountService();
-            var taskDistributor = new TaskDistributor(taskNotifier, userAccountService);
-                        
-            Container.Register(Component.For<IUserAccountService>().Instance(userAccountService).LifestyleSingleton());
+            var taskDistributor = new TaskDistributor(queueFactory, userAccountService);
+
+            sessionTimeoutEventSink = taskDistributor;
+
+            Container.Register(Component.For<IDocumentStore>().Instance(documentStore).LifestyleSingleton());
             Container.Register(Component.For<INotifyUsersOfTasks>().Instance(taskNotifier).LifestyleSingleton());
-            Container.Register(Component.For<TaskDistributor>().Instance(taskDistributor).LifestyleSingleton());            
-
-            Container.Register(Component.For<IControllerActivator>()
-                .UsingFactoryMethod<MyControllerActivator>((a, b) => new MyControllerActivator(Container))
-                    .LifeStyle.Is(Castle.Core.LifestyleType.Singleton));
-
+            Container.Register(Component.For<TaskDistributor, IReactToUserLoggedIn, IReactToUserLoggedOff>().Instance(taskDistributor).LifestyleSingleton());     
+            
             Container.Register(Component.For<IControllerFactory>()
-                .UsingFactoryMethod<MyControllerFactory>((a, b) => new MyControllerFactory(Container))
+                .Instance(new MyControllerFactory(Container))
                     .LifeStyle.Is(Castle.Core.LifestyleType.Singleton));            
 
-            Container.Register(AllTypes.FromThisAssembly().BasedOn<IController>().LifestyleTransient());
+            Container.Register(AllTypes.FromThisAssembly().BasedOn<IController>().LifestyleTransient());                       
 
             GlobalHost.DependencyResolver.Register(typeof(TaskDistributor), () => taskDistributor);
             GlobalHost.DependencyResolver.Register(typeof(ConnectionLookup), () => connectionLookup);
@@ -137,8 +150,8 @@ namespace RealTime
                                             .LoadMessageHandlers()
                                         .CreateBus()
                                         .Start();
-        }        
-        
+        }
+
         public class MyControllerActivator : IControllerActivator 
         {
             private IWindsorContainer container;

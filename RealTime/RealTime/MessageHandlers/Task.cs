@@ -25,5 +25,15 @@ namespace RealTime.MessageHandlers
             HandledBy = null;
             InProgress = false;
         }
+
+        public override bool Equals(object obj)
+        {
+            return ((UserTask)obj).Id == this.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return Id.GetHashCode() ^ 17;
+        }
     }
 }
